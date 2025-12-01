@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            font-family: 'Poppins', sans-serif;
+
+        }
+        #back{
+            display: grid;
+            height: 100vh;
+            width: 100vw;
+            place-items: center;
+            background:linear-gradient(pink,rgb(111, 186, 248),rgb(240, 161, 240))
+        }
+        #main{
+            width: 400px;
+            height: 400px;
+            background-color:rgba(255, 255, 255, 0.345);
+
+            margin: auto;
+            text-align: center;
+            padding-top: 30px;
+            border-radius: 20px;
+            color: rgb(0, 0, 0);
+        }
+        #main1, #main2{
+            margin-top: 20px;
+        }
+        #head h3{
+            margin: 0;
+            padding: 0;
+            font-size: 24px;
+            color: whitesmoke;
+        }
+        #email, #pass{
+            width: 250px;
+            height: 30px;
+            border-radius: 10px;
+            border: 1px solid grey;
+            padding-left: 10px;
+        }
+        #btn{
+            width: 100px;
+            height: 35px;
+            border-radius: 9px;
+            border: none;
+            background-color: #458cd2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 260px;     
+            margin: 12px auto;
+        }
+        .row .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #box{
+            width: 15px;
+            height: 15px;
+            margin: 0%;
+            cursor: pointer;
+ }
+        #rem{
+           display: inline-block;
+           margin: 0;
+           font-size: 14px;
+         
+        }
+     #forgot{
+            font-size: 14px;
+            color: #458cd2;
+            text-decoration: none;
+        }
+        #forgot:hover{
+            text-decoration: underline;
+        }
+        #last{
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    #sign{
+        color: #458cd2;
+        text-decoration: none;
+    }
+    
+    </style>
+</head>
+<body>
+    <div id="back">
+    <div id="main">
+        <div id="head"><h3>LOGIN FORM</h3></div>
+        <br>
+            <form>
+                 <div id="main1">
+                <input type="Email" placeholder=" Enter Your Email" id="email">
+                <label for="email"> Username</label>
+                </div>
+                <div id="main2">
+                    <input type="password" placeholder="Enter Your Password" id="pass">
+                    <label for="pass"> Password</label>
+                 </div>
+                 <div class="row">
+                    <div class="left">
+                      <input type="checkbox" id="box">
+                      <label for="box" id="rem">Remember me</label>
+                    </div>
+                    <div class="right">
+                      <a href="#" id="forgot">Forgot password?</a>
+                    </div>
+                 </div>
+               
+                 <div id="main3">
+                    <button type="submit" id="btn">Login</button>
+                 </div>
+                 <div id="last">
+                    <label for="sign">Don't Have an account?</label>
+                    <a href="#" id="sign">Signup</a>
+
+                 </div>
+                
+            </form>
+        
+
+    </div>
+    </div>
+</body>
+</html>
