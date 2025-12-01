@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Simple Calculator</title>
+<style>
+  :root {
+    --bg: #f3f4f6;
+    --panel: #fff;
+    --accent: #1f2937;
+    --button: #e5e7eb;
+    --accent-btn: #6366f1;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: var(--bg);
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    margin: 0;
+  }
+  .calculator {
+    width: 360px;
+    background: var(--panel);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    padding: 18px;
+  }
+  .display {
+    height: 64px;
+    background: #111827;
+    color: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1.6rem;
+    text-align: right;
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .display .expression { font-size: 1rem; opacity: 0.8; }
+  .buttons {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  button {
+    height: 56px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1rem;
+    background: var(--button);
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+  }
+  button.operator { background: #f97316; color: white; }
+  button.equals { background: var(--accent-btn); color: white; grid-column: span 2; }
+  button.clear { background: #ef4444; color: white; }
+  button.zero { grid-column: span 2; }
+  button:active { transform: translateY(1px); }
+  @media (max-width: 420px) {
+    .calculator { width: 94%; }
+  }
+</style>
+</head>
+<body>
+  <div class="calculator" role="application" aria-label="Simple Calculator">
+    <div class="display" id="display" aria-live="polite">
+      <div class="expression" id="expression">0</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="buttons">
+      <button class="clear" data-action="clear">C</button>
+      <button data-action="backspace">⌫</button>
+      <button data-value="(">(</button>
+      <button data-value=")">)</button>
+
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="operator" data-value="/">÷</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="operator" data-value="*">×</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button class="operator" data-value="-">−</button>
+
+      <button class="zero" data-value="0">0</button>
+      <button data-value=".">.</button>
+      <button class="equals" data-action="equals">=</button>
+      <button class="operator" data-value="+">+</button>
+    </div>
+  </div>
+
+<script>
+  function tokenize(expr) {
+    const re = /(\d+(\.\d+)?)|[+\-*/()]/g;
+    const tokens = [];
+    let m;
+    while ((m = re.exec(expr)) !== null) tokens.push(m[0]);
+    return tokens;
+  }
+
+  function precedence(op) {
+    if (op === '+' || op === '-') return 1;
+    if (op === '*' || op === '/') return 2;
+    return 0;
+  }
+
+  function toRPN(tokens) {
+    const output = [];
+    const ops = [];
+    for (const t of tokens) {
+      if (!isNaN(Number(t))) {
+        output.push(t);
+      } else if (t === '+'||t === '-'||t === '*'||t === '/') {
+        while (ops.length && precedence(ops[ops.length-1]) >= precedence(t)) {
+          output.push(ops.pop());
+        }
+        ops.push(t);
+      } else if (t === '(') {
+        ops.push(t);
+      } else if (t === ')') {
+        while (ops.length && ops[ops.length-1] !== '(') {
+          output.push(ops.pop());
+        }
+        ops.pop();
+      }
+    }
+    while (ops.length) output.push(ops.pop());
+    return output;
+  }
+
+  function evalRPN(rpn) {
+    const stack = [];
+    for (const token of rpn) {
+      if (!isNaN(Number(token))) stack.push(Number(token));
+      else {
+        const b = stack.pop();
+        const a = stack.pop();
+        switch (token) {
+          case '+': stack.push(a + b); break;
+          case '-': stack.push(a - b); break;
+          case '*': stack.push(a * b); break;
+          case '/': stack.push(a / b); break;
+        }
+      }
+    }
+    return stack[0];
+  }
+
+  function safeEvaluate(expr) {
+    try {
+      expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
+      const tokens = tokenize(expr);
+      if (!tokens.length) return 0;
+      const rpn = toRPN(tokens);
+      const result = evalRPN(rpn);
+      return isFinite(result) ? result : 'Error';
+    } catch {
+      return 'Error';
+    }
+  }
+
+  const expressionEl = document.getElementById('expression');
+  const resultEl = document.getElementById('result');
+  let expression = '';
+
+  function updateUI() {
+    expressionEl.textContent = expression || '0';
+    const res = safeEvaluate(expression || '0');
+    resultEl.textContent = (res === 'Error') ? res : String(res);
+  }
+
+  function insertValue(val) {
+    if (val === '.') {
+      const parts = expression.split(/[\+\-\*\/\(\)]/);
+      if (parts.length) {
+        const last = parts[parts.length-1] || '';
+        if (last.includes('.')) return;
+      }
+    }
+
+    const ops = ['+', '-', '*', '/'];
+    const last = expression.slice(-1);
+    if (ops.includes(last) && ops.includes(val)) {
+      expression = expression.slice(0, -1) + val;
+    } else {
+      expression += val;
+    }
+    updateUI();
+  }
+
+  function backspace() {
+    expression = expression.slice(0, -1);
+    updateUI();
+  }
+
+  function clearAll() {
+    expression = '';
+    updateUI();
+  }
+
+  function evaluateNow() {
+    const val = safeEvaluate(expression || '0');
+    if (val === 'Error') {
+      resultEl.textContent = 'Error';
+    } else {
+      expression = String(val);
+      updateUI();
+    }
+  }
+
+  document.querySelector('.buttons').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const val = btn.dataset.value;
+
+    if (action === 'clear') clearAll();
+    else if (action === 'backspace') backspace();
+    else if (action === 'equals') evaluateNow();
+    else if (val) insertValue(val);
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (/^\d$/.test(e.key)) insertValue(e.key);
+    else if (['+','-','*','/','(',')','.'].includes(e.key)) insertValue(e.key);
+    else if (e.key === 'Enter') { e.preventDefault(); evaluateNow(); }
+    else if (e.key === 'Backspace') backspace();
+    else if (e.key === 'Delete') clearAll();
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
